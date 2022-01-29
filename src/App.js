@@ -2,7 +2,6 @@ import * as React from "react";
 import Amplify, { API, Auth } from "aws-amplify";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
 import Button from "@mui/material/Button";
@@ -61,18 +60,33 @@ const awsConfig = {
 
 Amplify.configure(awsConfig);
 
-const Listing = ({ thumb_image, name, current_bid }) => {
+function openInNewTab(url) {
+  var win = window.open(url, "_blank");
+  win.focus();
+}
+
+const Listing = ({
+  style,
+  listing: { thumb_image, name, current_bid, url },
+}) => {
+  const goToLot = React.useCallback(() => openInNewTab(url), [url]);
+
   return (
     <Box
-      sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        minWidth: "320px",
+        ...style,
+      }}
     >
-      <img
-        src={apiUrl + "/image" + thumb_image}
-        alt={name}
-        style={{ maxWidth: "20vw" }}
-      />
-      <Typography>{name}</Typography>
+      <img src={apiUrl + "/image" + thumb_image} alt={name} style={{}} />
+      <Typography align="center">{name}</Typography>
       <Typography>$ {current_bid}</Typography>
+      <Button variant="contained" onClick={goToLot}>
+        VIEW LOT
+      </Button>
     </Box>
   );
 };
@@ -93,12 +107,12 @@ function ReserveMetRadioGroup({ reserveMet, setReserveMet }) {
         <FormControlLabel
           value="1"
           control={<Radio />}
-          label="Has Met Reserve"
+          label="Hasn't Met Reserve"
         />
         <FormControlLabel
           value="2"
           control={<Radio />}
-          label="Hasn't Met Reserve"
+          label="Has Met Reserve"
         />
       </RadioGroup>
     </FormControl>
@@ -209,11 +223,7 @@ function ReactApp() {
               passes && listing.reserve_met === !!(parseInt(reserveMet) - 1);
           }
           if (passes) {
-            curItems.push(
-              <Grid item xs={3} key={listing.id}>
-                <Listing {...listing} />
-              </Grid>
-            );
+            curItems.push(<Listing listing={listing} style={{ flex: 0.25 }} />);
           }
           return curItems;
         }, []),
@@ -256,9 +266,16 @@ function ReactApp() {
         reserveMet={reserveMet}
         setReserveMet={setReserveMet}
       />
-      <Grid container spacing={2} style={{ maxWidth: 1000 }}>
+      <Box
+        style={{
+          maxWidth: 1000,
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
         {gridItems}
-      </Grid>
+      </Box>
     </Box>
   );
 }
