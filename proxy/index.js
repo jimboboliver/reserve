@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
 import express from "express";
+import cors from "cors";
 
-const rootUrl = "https://www.australianwhiskyauctions.com.au/live-auction";
+const rootUrl =
+  "https://www.australianwhiskyauctions.com.au/live-auction/180-per-page";
 
 const app = express();
 export default app;
@@ -23,6 +25,8 @@ async function handler(event) {
   };
   return response;
 }
+
+app.use(cors());
 
 app.get("/", async (req, res) => {
   res.send(await handler(req.query));
