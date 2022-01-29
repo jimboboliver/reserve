@@ -1,0 +1,2 @@
+Compress-Archive .\* -CompressionLevel Fastest -DestinationPath function.zip -Force
+aws lambda update-function-code --function-name reserve --zip-file fileb://function.zip --profile chimpin --region ap-southeast-2
