@@ -13,6 +13,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import FormLabel from "@mui/material/FormLabel";
 
+import AuctionGrid from "./AuctionGrid";
+
 const apiUrl =
   "https://b0wz8hrznd.execute-api.ap-southeast-2.amazonaws.com/prod";
 
@@ -60,37 +62,6 @@ const awsConfig = {
 
 Amplify.configure(awsConfig);
 
-function openInNewTab(url) {
-  var win = window.open(url, "_blank");
-  win.focus();
-}
-
-const Listing = ({
-  style,
-  listing: { thumb_image, name, current_bid, url },
-}) => {
-  const goToLot = React.useCallback(() => openInNewTab(url), [url]);
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        minWidth: "320px",
-        ...style,
-      }}
-    >
-      <img src={apiUrl + "/image" + thumb_image} alt={name} style={{}} />
-      <Typography align="center">{name}</Typography>
-      <Typography>$ {current_bid}</Typography>
-      <Button variant="contained" onClick={goToLot}>
-        VIEW LOT
-      </Button>
-    </Box>
-  );
-};
-
 function ReserveMetRadioGroup({ reserveMet, setReserveMet }) {
   const onChange = React.useCallback(
     (event) => {
@@ -108,11 +79,13 @@ function ReserveMetRadioGroup({ reserveMet, setReserveMet }) {
           value="1"
           control={<Radio />}
           label="Hasn't Met Reserve"
+          sx={{ color: "red" }}
         />
         <FormControlLabel
           value="2"
           control={<Radio />}
           label="Has Met Reserve"
+          sx={{ color: "green" }}
         />
       </RadioGroup>
     </FormControl>
@@ -197,39 +170,6 @@ function ReactApp() {
     getCurrentAuction();
   }, [getCurrentAuction]);
 
-  const gridItems = React.useMemo(
-    () =>
-      listings
-        .sort(({ aCurrentBid }, { bCurrentBid }) => {
-          if (aCurrentBid > bCurrentBid) {
-            return 1;
-          } else if (aCurrentBid === bCurrentBid) {
-            return 0;
-          }
-          return -1;
-        })
-        .reduce((curItems, listing) => {
-          let passes = true;
-          if (search.length > 0) {
-            passes =
-              passes &&
-              listing.name
-                .trim()
-                .toLowerCase()
-                .includes(search.trim().toLowerCase());
-          }
-          if (reserveMet !== "0") {
-            passes =
-              passes && listing.reserve_met === !!(parseInt(reserveMet) - 1);
-          }
-          if (passes) {
-            curItems.push(<Listing listing={listing} style={{ flex: 0.25 }} />);
-          }
-          return curItems;
-        }, []),
-    [listings, search, reserveMet]
-  );
-
   return (
     <Box
       sx={{
@@ -266,16 +206,12 @@ function ReactApp() {
         reserveMet={reserveMet}
         setReserveMet={setReserveMet}
       />
-      <Box
-        style={{
-          maxWidth: 1000,
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
-      >
-        {gridItems}
-      </Box>
+      <AuctionGrid
+        listings={listings}
+        search={search}
+        reserveMet={reserveMet}
+        apiUrl={apiUrl}
+      />
     </Box>
   );
 }
