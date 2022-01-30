@@ -93,16 +93,26 @@ function ReserveMetRadioGroup({ reserveMet, setReserveMet }) {
 }
 
 const Filters = ({ search, setSearch, reserveMet, setReserveMet }) => {
+  const [_search, _setSearch] = React.useState(search);
+  const _changeTimeout = React.useRef(null);
   const onChangeSearch = React.useCallback(
     (event) => {
-      setSearch(event.target.value);
+      const val = event.target.value;
+      _setSearch(val);
+      if (_changeTimeout.current !== null) {
+        clearTimeout(_changeTimeout.current);
+      }
+      _changeTimeout.current = setTimeout(() => {
+        setSearch(val);
+      }, 250);
     },
     [setSearch]
   );
+
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 5 }}>
       <TextField
-        value={search}
+        value={_search}
         label="Search"
         variant="standard"
         onChange={onChangeSearch}
@@ -115,7 +125,7 @@ const Filters = ({ search, setSearch, reserveMet, setReserveMet }) => {
   );
 };
 
-const TimeDiff = ({ last }) => {
+const TimeDiff = ({ last, style }) => {
   const [now, setNow] = React.useState(new Date());
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -124,10 +134,12 @@ const TimeDiff = ({ last }) => {
     return () => clearInterval(interval);
   }, []);
   return (
-    <Typography>
-      Last loaded auction {Math.round((now.valueOf() - last.valueOf()) / 1000)}{" "}
-      seconds ago
-    </Typography>
+    <Box style={style}>
+      <Typography>
+        Last loaded auction{" "}
+        {Math.round((now.valueOf() - last.valueOf()) / 1000)} seconds ago
+      </Typography>
+    </Box>
   );
 };
 
@@ -141,10 +153,11 @@ function ReactApp() {
   const getCurrentAuction = React.useCallback(async () => {
     setLoading(true);
     setListings([]);
+    const reqPerLoop = 3;
     let page = 1;
     while (page < 50) {
       const requests = [];
-      for (let i = 0; i < page + 5; i++) {
+      for (let i = 0; i < page + reqPerLoop; i++) {
         requests.push(
           API.get("reserve", "/", {
             queryStringParameters: { page: page + i },
@@ -177,7 +190,7 @@ function ReactApp() {
       if (anyEmpty) {
         break;
       }
-      page += 6;
+      page += reqPerLoop + 1;
     }
     setLoading(false);
     setLastGot(new Date());
