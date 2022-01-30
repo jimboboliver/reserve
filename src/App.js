@@ -143,25 +143,41 @@ function ReactApp() {
     setListings([]);
     let page = 1;
     while (page < 50) {
-      const queryStringParameters = { page };
-      const nextListings = await API.get("reserve", "/", {
-        queryStringParameters,
-      })
-        .then((body) => {
-          return JSON.parse(body.body);
-        })
-        .catch((error) => {
-          console.error(error);
-          return [];
-        });
+      const requests = [];
+      for (let i = 0; i < page + 5; i++) {
+        requests.push(
+          API.get("reserve", "/", {
+            queryStringParameters: { page: page + i },
+          })
+            .then((body) => {
+              return JSON.parse(body.body);
+            })
+            .catch((error) => {
+              console.error(error);
+              return [];
+            })
+        );
+      }
+      const nextListings = await Promise.all(requests).catch((error) => {
+        console.error(error);
+        return [];
+      });
+      let anyEmpty = true;
       if (nextListings.length > 0) {
+        anyEmpty = false;
+        const joined = nextListings.reduce((curJoined, listings) => {
+          curJoined = curJoined.concat(listings);
+          anyEmpty = anyEmpty || listings.length === 0;
+          return curJoined;
+        }, []);
         setListings((old) => {
-          return [...old, ...nextListings];
+          return [...old, ...joined];
         });
-      } else {
+      }
+      if (anyEmpty) {
         break;
       }
-      page += 1;
+      page += 6;
     }
     setLoading(false);
     setLastGot(new Date());
