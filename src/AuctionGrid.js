@@ -31,7 +31,10 @@ const Listing = ({
       <img src={apiUrl + "/image" + thumb_image} alt={name} style={{}} />
       <Typography align="center">{name}</Typography>
       <Typography color={reserve_met ? "green" : "red"}>
-        $ {current_bid}
+        Current Bid: $ {current_bid}
+      </Typography>
+      <Typography>
+        Hammer + Shipping: $ {Math.round(current_bid * 1.1 + 14)}
       </Typography>
       <Button variant="contained" onClick={goToLot}>
         VIEW LOT
