@@ -55,7 +55,7 @@ export default function AuctionGrid({ listings, search, reserveMet, apiUrl }) {
           }
           return -1;
         })
-        .reduce((curItems, listing) => {
+        .reduce((curItems, listing, index) => {
           let passes = true;
           if (search.length > 0) {
             passes =
@@ -75,7 +75,7 @@ export default function AuctionGrid({ listings, search, reserveMet, apiUrl }) {
                 listing={listing}
                 apiUrl={apiUrl}
                 style={{ flex: 0.2 }}
-                key={listing.id}
+                key={`${index}${listing.id}`}
               />
             );
           }

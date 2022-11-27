@@ -1,6 +1,7 @@
 import * as React from "react";
-import Amplify, { API, Auth } from "aws-amplify";
+import { Amplify, API, Auth } from "aws-amplify";
 import { withAuthenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
 import Box from "@mui/material/Box";
 import Backdrop from "@mui/material/Backdrop";
 import CircularProgress from "@mui/material/CircularProgress";
